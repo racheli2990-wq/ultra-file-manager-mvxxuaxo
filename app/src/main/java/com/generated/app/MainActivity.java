@@ -22,7 +22,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StatFs;
-import android.provider.Settings;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -45,8 +45,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Stack;
+import android.content.SharedPreferences;
 
 public class MainActivity extends Activity {
 
@@ -348,7 +348,7 @@ public class MainActivity extends Activity {
         this.currentDirectory = dir;
         tvCurrentPath.setText(dir.getAbsolutePath());
 
-        SharedPreferences prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean showHidden = prefs.getBoolean("show_hidden", false);
         String sortBy = prefs.getString("sort_by", "name");
 

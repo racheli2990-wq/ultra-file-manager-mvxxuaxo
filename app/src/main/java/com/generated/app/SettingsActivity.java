@@ -3,6 +3,7 @@ package com.generated.app;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.Switch;
@@ -17,7 +18,7 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        prefs = getSharedPreferences("app_settings", MODE_PRIVATE);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         findViewById(R.id.btn_back_settings).setOnClickListener(v -> finish());
 
