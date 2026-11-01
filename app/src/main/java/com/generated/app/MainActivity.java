@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Locale; // Added import for Locale
 import java.util.Stack;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager; // Corrected import for PreferenceManager
+
 
 public class MainActivity extends Activity {
 
@@ -349,6 +351,7 @@ public class MainActivity extends Activity {
         this.currentDirectory = dir;
         tvCurrentPath.setText(dir.getAbsolutePath());
 
+        // Corrected import for PreferenceManager
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean showHidden = prefs.getBoolean("show_hidden", false);
         String sortBy = prefs.getString("sort_by", "name");
