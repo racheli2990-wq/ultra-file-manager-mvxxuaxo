@@ -36,6 +36,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +55,7 @@ public class MainActivity extends Activity {
     private static final int REQ_CODE_WIFI_SETTINGS = 1002;
     private static final int REQ_CODE_LOCATION_PERMISSION = 1003;
 
-    private ListView listView;
+    private ListView listView; // Changed from ListView to android.widget.ListView
     private GridView gridView;
     private FileListAdapter adapter;
     private TextView tvCurrentPath, tvStorageInfo, tvEmpty;
