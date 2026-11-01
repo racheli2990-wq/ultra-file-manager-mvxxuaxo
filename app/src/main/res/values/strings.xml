@@ -14,7 +14,7 @@
     <string name="permission_required">נדרשת הרשאת גישה לקבצים כדי להציג את האחסון שלך</string>
     <string name="grant_permission">אישור הרשאה</string>
     <string name="new_folder">תיקייה חדשה</string>
-    <string name="enter_folder_name">הכנס שם לתיקייה החדשה:</string>
+    <string name="enter_folder_name_hint">שם התיקייה</string>
     <string name="create">צור</string>
     <string name="cancel">ביטול</string>
     <string name="rename">שנה שם</string>
@@ -22,7 +22,7 @@
     <string name="details">פרטים</string>
     <string name="share">שתף</string>
     <string name="open">פתח</string>
-    <string name="confirm_delete">האם אתה בטוח שברצונך למחוק קובץ זה?</string>
+    <string name="confirm_delete">האם אתה בטוח שברצונך למחוק את "%s"?</string>
     <string name="file_deleted">הקובץ נמחק בהצלחה</string>
     <string name="delete_error">שגיאה במחיקת הקובץ</string>
     <string name="rename_title">שינוי שם קובץ</string>
@@ -48,4 +48,21 @@
     <string name="items_count">%d פריטים</string>
     <string name="rotate">סובב</string>
     <string name="close">סגור</string>
+
+    <!-- WiFi Scanner Strings -->
+    <string name="wifi_scanner_title">סורק רשתות Wi-Fi</string>
+    <string name="scanning">סורק...</string>
+    <string name="no_wifi_networks_found">לא נמצאו רשתות Wi-Fi</string>
+    <string name="connect">התחבר</string>
+    <string name="password">סיסמה</string>
+    <string name="enter_password_for">הזן סיסמה עבור %s</string>
+    <string name="unknown_ssid">(SSID לא ידוע)</string>
+    <string name="connected_to">מחובר ל-</string>
+    <string name="rescan">סרוק שוב</string>
+    <string name="wifi_settings">הגדרות Wi-Fi</string>
+    <string name="permission_location_needed_for_wifi">הרשאת מיקום נדרשת כדי לסרוק רשתות Wi-Fi.</string>
+    <string name="wifi_disabled_message">ה-Wi-Fi כבוי.</string>
+    <string name="tap_to_connect">לחץ כדי להתחבר</string>
+    <string name="security">אבטחה:</string>
+    <string name="delete_title">אישור מחיקה</string>
 </resources>

@@ -3,25 +3,39 @@ package com.generated.app;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StatFs;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +51,8 @@ import java.util.Stack;
 public class MainActivity extends Activity {
 
     private static final int REQ_CODE_STORAGE = 1001;
+    private static final int REQ_CODE_WIFI_SETTINGS = 1002;
+    private static final int REQ_CODE_LOCATION_PERMISSION = 1003;
 
     private ListView listView;
     private GridView gridView;
@@ -53,6 +69,12 @@ public class MainActivity extends Activity {
     private List<FileItem> currentFileList = new ArrayList<>();
     private List<FileItem> filteredFileList = new ArrayList<>();
 
+    private WifiManager wifiManager;
+    private WifiScanReceiver wifiScanReceiver;
+    private List<ScanResult> wifiNetworks = new ArrayList<>();
+    private boolean isScanningWifi = false;
+    private final Handler wifiScanHandler = new Handler(Looper.getMainLooper());
+
     private boolean isGridView = false;
     private int currentCategory = 0; // 0: All, 1: Images, 2: Videos, 3: Audio, 4: Docs, 5: Downloads
 
@@ -64,6 +86,10 @@ public class MainActivity extends Activity {
         initViews();
         setupListeners();
         checkPermissionsAndLoad();
+
+        // Initialize WiFi related components
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiScanReceiver = new WifiScanReceiver();
     }
 
     @Override
@@ -74,6 +100,36 @@ public class MainActivity extends Activity {
             if (currentDirectory != null) {
                 loadDirectory(currentDirectory);
             }
+        }
+
+        // Register WiFi scan receiver
+        IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(wifiScanReceiver, filter);
+
+        // Check and request location permission if needed for WiFi scanning
+        checkLocationPermissionForWifi();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Unregister WiFi scan receiver
+        unregisterReceiver(wifiScanReceiver);
+        // Stop WiFi scanning if active
+        if (isScanningWifi) {
+            wifiScanHandler.removeCallbacks(wifiScanRunnable);
+            isScanningWifi = false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Ensure receiver is unregistered
+        try {
+            unregisterReceiver(wifiScanReceiver);
+        } catch (IllegalArgumentException e) {
+            // Receiver not registered, ignore
         }
     }
 
@@ -130,6 +186,11 @@ public class MainActivity extends Activity {
         findViewById(R.id.fab_add).setOnClickListener(v -> showCreateFolderDialog());
 
         findViewById(R.id.btn_grant_permission).setOnClickListener(v -> requestStoragePermission());
+
+        findViewById(R.id.btn_wifi_scan).setOnClickListener(v -> {
+            Intent wifiIntent = new Intent(this, WifiScannerActivity.class);
+            startActivity(wifiIntent);
+        });
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -264,6 +325,7 @@ public class MainActivity extends Activity {
             tvStorageInfo.setText(getString(R.string.storage_used, formattedUsed, formattedTotal));
         } catch (Exception e) {
             tvStorageInfo.setText("נתוני אחסון לא זמינים");
+            Log.e("MainActivity", "Error updating storage stats", e);
         }
     }
 
@@ -274,7 +336,10 @@ public class MainActivity extends Activity {
     }
 
     private void loadDirectory(File dir) {
-        if (dir == null || !dir.isDirectory()) return;
+        if (dir == null || !dir.isDirectory()) {
+            Log.e("MainActivity", "Attempted to load invalid directory: " + dir);
+            return;
+        }
 
         this.currentDirectory = dir;
         tvCurrentPath.setText(dir.getAbsolutePath());
@@ -305,6 +370,8 @@ public class MainActivity extends Activity {
                     return a.getName().compareToIgnoreCase(b.getName());
                 }
             });
+        } else {
+            Log.w("MainActivity", "Directory is null or empty: " + dir.getAbsolutePath());
         }
 
         filterByCategory();
@@ -313,7 +380,7 @@ public class MainActivity extends Activity {
     private void filterByCategory() {
         filteredFileList.clear();
         for (FileItem item : currentFileList) {
-            if (currentCategory == 0) {
+            if (currentCategory == 0) { // All
                 filteredFileList.add(item);
             } else if (currentCategory == 1 && item.getType() == FileItem.TYPE_IMAGE) {
                 filteredFileList.add(item);
@@ -323,6 +390,10 @@ public class MainActivity extends Activity {
                 filteredFileList.add(item);
             } else if (currentCategory == 4 && item.getType() == FileItem.TYPE_DOC) {
                 filteredFileList.add(item);
+            } else if (currentCategory == 5 && item.getFile().getParentFile() != null &&
+                       item.getFile().getParentFile().getName().equals(Environment.DIRECTORY_DOWNLOADS)) {
+                // Special handling for Downloads category - requires checking parent, might not be perfect
+                filteredFileList.add(item);
             }
         }
         adapter.setData(filteredFileList);
@@ -331,11 +402,11 @@ public class MainActivity extends Activity {
 
     private void filterFiles(String query) {
         if (query.trim().isEmpty()) {
-            filterByCategory();
+            filterByCategory(); // Reset to category filter
             return;
         }
         List<FileItem> searchResults = new ArrayList<>();
-        for (FileItem item : filteredFileList) {
+        for (FileItem item : filteredFileList) { // Search within the currently filtered list
             if (item.getName().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT))) {
                 searchResults.add(item);
             }
@@ -347,20 +418,28 @@ public class MainActivity extends Activity {
         File file = item.getFile();
         int type = item.getType();
 
-        if (type == FileItem.TYPE_IMAGE) {
-            Intent intent = new Intent(this, ImageViewerActivity.class);
-            intent.putExtra("file_path", file.getAbsolutePath());
-            startActivity(intent);
-        } else if (type == FileItem.TYPE_VIDEO) {
-            Intent intent = new Intent(this, VideoViewerActivity.class);
-            intent.putExtra("file_path", file.getAbsolutePath());
-            startActivity(intent);
-        } else if (type == FileItem.TYPE_DOC) {
-            Intent intent = new Intent(this, TextViewerActivity.class);
-            intent.putExtra("file_path", file.getAbsolutePath());
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "פתיחת קובץ מסוג זה נתמכת דרך אפליקציות חיצוניות", Toast.LENGTH_SHORT).show();
+        try {
+            if (type == FileItem.TYPE_IMAGE) {
+                Intent intent = new Intent(this, ImageViewerActivity.class);
+                intent.putExtra("file_path", file.getAbsolutePath());
+                startActivity(intent);
+            } else if (type == FileItem.TYPE_VIDEO) {
+                Intent intent = new Intent(this, VideoViewerActivity.class);
+                intent.putExtra("file_path", file.getAbsolutePath());
+                startActivity(intent);
+            } else if (type == FileItem.TYPE_DOC || type == FileItem.TYPE_OTHER) {
+                Intent intent = new Intent(this, TextViewerActivity.class);
+                intent.putExtra("file_path", file.getAbsolutePath());
+                startActivity(intent);
+            } else if (type == FileItem.TYPE_FOLDER) {
+                historyStack.push(currentDirectory);
+                loadDirectory(item.getFile());
+            } else {
+                Toast.makeText(this, "פתיחת קובץ מסוג זה אינה נתמכת ישירות.", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "שגיאה בפתיחת הקובץ", Toast.LENGTH_SHORT).show();
+            Log.e("MainActivity", "Error opening file: " + file.getName(), e);
         }
     }
 
@@ -406,11 +485,13 @@ public class MainActivity extends Activity {
             if (!newName.isEmpty()) {
                 File target = new File(currentDirectory, newName);
                 if (item.getFile().renameTo(target)) {
-                    loadDirectory(currentDirectory);
+                    loadDirectory(currentDirectory); // Reload current directory to reflect changes
                     Toast.makeText(this, "השם שונה בהצלחה", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "כישלון בשינוי השם", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Toast.makeText(this, "השם לא יכול להיות ריק", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton(R.string.cancel, null);
@@ -419,12 +500,12 @@ public class MainActivity extends Activity {
 
     private void confirmDelete(FileItem item) {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.delete)
-                .setMessage(R.string.confirm_delete)
+                .setTitle(R.string.delete_title)
+                .setMessage(getString(R.string.confirm_delete, item.getName()))
                 .setPositiveButton(R.string.delete, (dialog, which) -> {
                     if (item.getFile().delete()) {
                         Toast.makeText(this, getString(R.string.file_deleted), Toast.LENGTH_SHORT).show();
-                        loadDirectory(currentDirectory);
+                        loadDirectory(currentDirectory); // Reload current directory
                         updateStorageStats();
                     } else {
                         Toast.makeText(this, getString(R.string.delete_error), Toast.LENGTH_SHORT).show();
@@ -451,7 +532,7 @@ public class MainActivity extends Activity {
         builder.setTitle(R.string.new_folder);
 
         final EditText input = new EditText(this);
-        input.setHint("שם התיקייה");
+        input.setHint(R.string.enter_folder_name_hint);
         builder.setView(input);
 
         builder.setPositiveButton(R.string.create, (dialog, which) -> {
@@ -459,11 +540,13 @@ public class MainActivity extends Activity {
             if (!folderName.isEmpty()) {
                 File newFolder = new File(currentDirectory, folderName);
                 if (newFolder.mkdir()) {
-                    loadDirectory(currentDirectory);
-                    Toast.makeText(this, "התיקייה נוצרה", Toast.LENGTH_SHORT).show();
+                    loadDirectory(currentDirectory); // Reload to show new folder
+                    Toast.makeText(this, "התיקייה נוצרה בהצלחה", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "שגיאה ביצירת התיקייה", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Toast.makeText(this, "שם התיקייה לא יכול להיות ריק", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton(R.string.cancel, null);
@@ -483,5 +566,91 @@ public class MainActivity extends Activity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    // --- WiFi Scanning Logic ---
+
+    private void checkLocationPermissionForWifi() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_CODE_LOCATION_PERMISSION);
+            } else {
+                startWifiScan();
+            }
+        } else {
+            startWifiScan();
+        }
+    }
+
+    private void startWifiScan() {
+        if (wifiManager != null && wifiManager.isWifiEnabled()) {
+            if (!isScanningWifi) {
+                isScanningWifi = true;
+                wifiManager.startScan();
+                Log.d("MainActivity", "WiFi scan initiated.");
+                // Schedule a callback to stop scanning and process results after a delay
+                wifiScanHandler.postDelayed(wifiScanRunnable, 5000); // Scan results usually available within a few seconds
+            }
+        } else {
+            Toast.makeText(this, "אנא הפעל את ה-Wi-Fi כדי לסרוק רשתות", Toast.LENGTH_LONG).show();
+            // Optionally, offer to open WiFi settings
+            findViewById(R.id.btn_wifi_scan).setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)));
+        }
+    }
+
+    private final Runnable wifiScanRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isScanningWifi) {
+                isScanningWifi = false;
+                Log.d("MainActivity", "Processing WiFi scan results.");
+                // The broadcast receiver will handle processing, this is just a timeout
+            }
+        }
+    };
+
+    private class WifiScanReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(intent.getAction())) {
+                Log.d("MainActivity", "SCAN_RESULTS_AVAILABLE_ACTION received.");
+                if (isScanningWifi) { // Only process if we initiated the scan
+                    isScanningWifi = false; // Stop considering it active
+                    wifiScanHandler.removeCallbacks(wifiScanRunnable); // Remove any pending timeout
+                    List<ScanResult> results = wifiManager.getScanResults();
+                    if (results != null) {
+                        wifiNetworks.clear();
+                        wifiNetworks.addAll(results);
+                        Log.d("MainActivity", "Found " + wifiNetworks.size() + " WiFi networks.");
+                        // You can now use wifiNetworks list, e.g., display it or filter it
+                        // For now, just log the count.
+                    } else {
+                        Log.w("MainActivity", "WiFi scan results were null.");
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_CODE_STORAGE) {
+            if (hasStoragePermission()) {
+                checkPermissionsAndLoad();
+            } else {
+                Toast.makeText(this, "הרשאת אחסון נדחתה. לא ניתן לגשת לקבצים.", Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == REQ_CODE_LOCATION_PERMISSION) {
+            if (hasLocationPermission()) {
+                startWifiScan();
+            } else {
+                Toast.makeText(this, "הרשאת מיקום נדחתה. סריקת Wi-Fi אינה זמינה.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private boolean hasLocationPermission() {
+        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 }
