@@ -22,7 +22,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StatFs;
-import android.preference.PreferenceManager;
+import android.provider.Settings; // Added import for Settings
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale; // Added import for Locale
 import java.util.Stack;
 import android.content.SharedPreferences;
 

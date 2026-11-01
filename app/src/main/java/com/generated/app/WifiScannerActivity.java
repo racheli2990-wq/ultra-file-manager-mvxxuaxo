@@ -17,7 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
+import android.provider.Settings; // Added import for Settings
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale; // Added import for Locale
 
 public class WifiScannerActivity extends Activity {
 
