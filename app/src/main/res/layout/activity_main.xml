@@ -9,7 +9,7 @@
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
         android:background="@color/card_bg"
         android:elevation="4dp"
@@ -41,7 +41,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Settings"
+            android:contentDescription="@string/settings"
             android:src="@drawable/ic_settings" />
 
         <ImageButton
@@ -49,7 +49,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="About Spaniard"
+            android:contentDescription="@string/about_title"
             android:src="@drawable/ic_info" />
     </LinearLayout>
 
@@ -105,7 +105,7 @@
             android:id="@+id/tv_storage_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="טוען נתוני אחסון..."
+            android:text="@string/loading_storage_info"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -310,7 +310,7 @@
                 android:paddingStart="24dp"
                 android:paddingEnd="24dp"
                 android:text="@string/grant_permission"
-                android:textColor="#FFFFFF" />
+                android:textColor="@color/white" />
         </LinearLayout>
     </FrameLayout>
 

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@color/black">
 
     <ImageView
         android:id="@+id/iv_fullscreen"
@@ -12,10 +12,11 @@
 
     <!-- Top Overlay Controls -->
     <LinearLayout
+        android:id="@+id/top_bar_image"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
-        android:background="#80000000"
+        android:background="#CC000000"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
@@ -36,7 +37,7 @@
             android:ellipsize="end"
             android:paddingStart="12dp"
             android:singleLine="true"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="16sp" />
 
         <ImageButton
@@ -44,14 +45,16 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_rotate" />
+            android:src="@drawable/ic_rotate"
+            android:contentDescription="@string/rotate" />
 
         <ImageButton
             android:id="@+id/btn_share_image"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_share" />
+            android:src="@drawable/ic_share"
+            android:contentDescription="@string/share" />
     </LinearLayout>
 
 </RelativeLayout>

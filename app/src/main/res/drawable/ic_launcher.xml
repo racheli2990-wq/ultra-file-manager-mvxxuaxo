@@ -7,16 +7,18 @@
     <path
         android:fillColor="#1A73E8"
         android:pathData="M16,0 L80,0 A16,16 0 0,1 96,16 L96,80 A16,16 0 0,1 80,96 L16,96 A16,16 0 0,1 0,80 L0,16 A16,16 0 0,1 16,0 Z" />
-    <!-- Spanish accent badge tab -->
+    <!-- Spanish Flag Inspired Layers -->
     <path
         android:fillColor="#FFC400"
-        android:pathData="M24,24 L44,24 L50,30 L72,30 A4,4 0 0,1 76,34 L76,70 A4,4 0 0,1 72,74 L24,74 A4,4 0 0,1 20,70 L20,28 A4,4 0 0,1 24,24 Z" />
-    <!-- Folder body layer -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M24,32 L40,32 L46,38 L72,38 A4,4 0 0,1 76,42 L76,70 A4,4 0 0,1 72,74 L24,74 A4,4 0 0,1 20,70 L20,36 A4,4 0 0,1 24,32 Z" />
-    <!-- Playful Spanish Red Accent Bar -->
+        android:pathData="M20,24 L76,24 L76,40 L20,40 Z" />
     <path
         android:fillColor="#C60B1E"
-        android:pathData="M20,64 L76,64 L76,70 A4,4 0 0,1 72,74 L24,74 A4,4 0 0,1 20,70 Z" />
+        android:pathData="M20,40 L76,40 L76,56 L20,56 Z" />
+    <path
+        android:fillColor="#C60B1E"
+        android:pathData="M20,72 L76,72 L76,80 L20,80 Z" />
+    <!-- Stylized File Icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,44 L44,44 L44,52 L36,52 Z M52,44 L60,44 L60,52 L52,52 Z M36,56 L60,56 L60,64 L36,64 Z M68,56 L72,56 L72,64 L68,64 Z M28,36 L72,36 L72,40 L28,40 Z" />
 </vector>
