@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Rounded Background in Google Blue -->
+    <path
+        android:fillColor="#1A73E8"
+        android:pathData="M16,0 L80,0 A16,16 0 0,1 96,16 L96,80 A16,16 0 0,1 80,96 L16,96 A16,16 0 0,1 0,80 L0,16 A16,16 0 0,1 16,0 Z" />
+    <!-- Spanish accent badge tab -->
+    <path
+        android:fillColor="#FFC400"
+        android:pathData="M24,24 L44,24 L50,30 L72,30 A4,4 0 0,1 76,34 L76,70 A4,4 0 0,1 72,74 L24,74 A4,4 0 0,1 20,70 L20,28 A4,4 0 0,1 24,24 Z" />
+    <!-- Folder body layer -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,32 L40,32 L46,38 L72,38 A4,4 0 0,1 76,42 L76,70 A4,4 0 0,1 72,74 L24,74 A4,4 0 0,1 20,70 L20,36 A4,4 0 0,1 24,32 Z" />
+    <!-- Playful Spanish Red Accent Bar -->
+    <path
+        android:fillColor="#C60B1E"
+        android:pathData="M20,64 L76,64 L76,70 A4,4 0 0,1 72,74 L24,74 A4,4 0 0,1 20,70 Z" />
+</vector>

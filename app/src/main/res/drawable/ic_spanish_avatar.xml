@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Outer Shield / Flag Circle Background -->
+    <path
+        android:fillColor="#C60B1E"
+        android:pathData="M60,4 C29.07,4 4,29.07 4,60 C4,90.93 29.07,116 60,116 C90.93,116 116,90.93 116,60 C116,29.07 90.93,4 60,4 Z" />
+    <!-- Yellow Stripe -->
+    <path
+        android:fillColor="#FFC400"
+        android:pathData="M4,40 L116,40 L116,80 L4,80 Z" />
+    <!-- Character Head Base -->
+    <path
+        android:fillColor="#F5CBA7"
+        android:pathData="M60,45 C48,45 40,55 40,68 C40,82 48,92 60,92 C72,92 80,82 80,68 C80,55 72,45 60,45 Z" />
+    <!-- Spanish Sombrero Brim -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M15,48 Q60,32 105,48 L100,54 Q60,40 20,54 Z" />
+    <!-- Sombrero Top -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M42,46 L45,28 Q60,24 75,28 L78,46 Z" />
+    <!-- Sombrero Ribbon in Spanish Red -->
+    <path
+        android:fillColor="#C60B1E"
+        android:pathData="M43,42 L77,42 L78,46 L42,46 Z" />
+    <!-- Cool Sunglasses -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M44,58 L57,58 L55,68 L46,68 Z M63,58 L76,58 L74,68 L65,68 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M56,60 L64,60 L64,63 L56,63 Z" />
+    <!-- Mustache -->
+    <path
+        android:fillColor="#1A1A1A"
+        android:pathData="M60,74 Q50,70 38,76 Q48,82 60,78 Q72,82 82,76 Q70,70 60,74 Z" />
+</vector>
