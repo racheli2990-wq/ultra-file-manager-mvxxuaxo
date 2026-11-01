@@ -360,7 +360,7 @@ public class MainActivity extends Activity {
             intent.putExtra("file_path", file.getAbsolutePath());
             startActivity(intent);
         } else {
-            Toast.stringToast(this, "פתיחת קובץ מסוג זה נתמכת דרך אפליקציות חיצוניות", Toast.LENGTH_SHORT);
+            Toast.makeText(this, "פתיחת קובץ מסוג זה נתמכת דרך אפליקציות חיצוניות", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -407,9 +407,9 @@ public class MainActivity extends Activity {
                 File target = new File(currentDirectory, newName);
                 if (item.getFile().renameTo(target)) {
                     loadDirectory(currentDirectory);
-                    Toast.stringToast(this, "השם שונה בהצלחה", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "השם שונה בהצלחה", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.stringToast(this, "כישלון בשינוי השם", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "כישלון בשינוי השם", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -423,11 +423,11 @@ public class MainActivity extends Activity {
                 .setMessage(R.string.confirm_delete)
                 .setPositiveButton(R.string.delete, (dialog, which) -> {
                     if (item.getFile().delete()) {
-                        Toast.stringToast(this, getString(R.string.file_deleted), Toast.LENGTH_SHORT);
+                        Toast.makeText(this, getString(R.string.file_deleted), Toast.LENGTH_SHORT).show();
                         loadDirectory(currentDirectory);
                         updateStorageStats();
                     } else {
-                        Toast.stringToast(this, getString(R.string.delete_error), Toast.LENGTH_SHORT);
+                        Toast.makeText(this, getString(R.string.delete_error), Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton(R.string.cancel, null)
@@ -460,9 +460,9 @@ public class MainActivity extends Activity {
                 File newFolder = new File(currentDirectory, folderName);
                 if (newFolder.mkdir()) {
                     loadDirectory(currentDirectory);
-                    Toast.stringToast(this, "התיקייה נוצרה", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "התיקייה נוצרה", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.stringToast(this, "שגיאה ביצירת התיקייה", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "שגיאה ביצירת התיקייה", Toast.LENGTH_SHORT).show();
                 }
             }
         });

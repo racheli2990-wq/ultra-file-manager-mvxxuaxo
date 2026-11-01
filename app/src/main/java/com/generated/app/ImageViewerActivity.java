@@ -43,6 +43,6 @@ public class ImageViewerActivity extends Activity {
         });
 
         findViewById(R.id.btn_share_image).setOnClickListener(v ->
-                Toast.stringToast(this, "שיתוף קובץ מוכן", Toast.LENGTH_SHORT));
+                Toast.makeText(this, "שיתוף קובץ מוכן", Toast.LENGTH_SHORT).show());
     }
 }

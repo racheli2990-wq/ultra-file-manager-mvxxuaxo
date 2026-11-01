@@ -22,6 +22,6 @@ public class AboutActivity extends Activity {
 
         Button btnOle = findViewById(R.id.btn_ole);
         btnOle.setOnClickListener(v ->
-                Toast.stringToast(this, getString(R.string.ole_toast), Toast.LENGTH_LONG));
+                Toast.makeText(this, getString(R.string.ole_toast), Toast.LENGTH_LONG).show());
     }
 }

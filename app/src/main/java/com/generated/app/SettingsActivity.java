@@ -48,6 +48,6 @@ public class SettingsActivity extends Activity {
 
         Button btnClearCache = findViewById(R.id.btn_clear_cache);
         btnClearCache.setOnClickListener(v ->
-                Toast.stringToast(this, getString(R.string.cache_cleared), Toast.LENGTH_SHORT));
+                Toast.makeText(this, getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show());
     }
 }
