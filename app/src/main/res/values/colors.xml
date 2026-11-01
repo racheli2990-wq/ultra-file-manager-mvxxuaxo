@@ -19,5 +19,5 @@
     <color name="edit_text_background">#F1F3F4</color>
     <color name="search_background">#F1F3F4</color>
     <color name="storage_progress_background">#E0E0E0</color>
-    <color name="wifi_connected_highlight">#4CAF50</color> <!-- Green for connected -->
+    <color name="wifi_connected_highlight">#4CAF50</color>
 </resources>

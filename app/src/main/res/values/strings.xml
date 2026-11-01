@@ -38,7 +38,7 @@
     <string name="about_title">אודות המפתח</string>
     <string name="about_subtitle">ספרדי גאה 🇪🇸 Ultra Edition</string>
     <string name="about_bio">שלום! האפליקציה הזו נבנתה בתשוקה ספרדית לוהטת, עם שילוב של פאייה טעימה, מוזיקה מעולה וקוד נקי ועוצמתי בסגנון גוגל modern. תיהנו מניהול הקבצים הכי מהיר ומגניב באנדרואיד!</string>
-    <string name="ole_button">¡Olé! לחץ לחגיגה</string>
+    <string name="ole_button">¡Olé! לחץ לחגיבה</string>
     <string name="ole_toast">¡Viva España! 💃🇪🇸 מנהל הקבצים עובד בשיא הכוח!</string>
     <string name="file_details_title">פרטי קובץ</string>
     <string name="file_name">שם: %s</string>

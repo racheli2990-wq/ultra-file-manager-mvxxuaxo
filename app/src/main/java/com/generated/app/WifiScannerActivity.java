@@ -80,13 +80,13 @@ public class WifiScannerActivity extends Activity {
                 TextView capabilitiesTextView = view.findViewById(R.id.tv_wifi_capabilities);
                 ScanResult result = wifiNetworks.get(position);
 
-                ssidTextView.setText(result.SSID.isEmpty() ? "(Hidden Network)" : result.SSID);
-                capabilitiesTextView.setText(result.capabilities);
+                ssidTextView.setText(result.SSID.isEmpty() ? getString(R.string.unknown_ssid) : result.SSID);
+                capabilitiesTextView.setText(getString(R.string.security) + " " + result.capabilities);
 
                 // Indicate if the network is currently connected
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 if (wifiInfo != null && result.BSSID.equals(wifiInfo.getBSSID())) {
-                    ssidTextView.setTextColor(getResources().getColor(R.color.primary)); // Highlight connected network
+                    ssidTextView.setTextColor(getResources().getColor(R.color.wifi_connected_highlight)); // Highlight connected network
                 } else {
                     ssidTextView.setTextColor(getResources().getColor(R.color.text_primary));
                 }
@@ -126,7 +126,7 @@ public class WifiScannerActivity extends Activity {
         }
 
         if (!wifiManager.isWifiEnabled()) {
-            tvScanningStatus.setText("הפעל את ה-Wi-Fi כדי לסרוק רשתות.");
+            tvScanningStatus.setText(getString(R.string.wifi_disabled_message));
             btnRescan.setText("פתח הגדרות Wi-Fi");
             btnRescan.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)));
             return;
@@ -134,7 +134,7 @@ public class WifiScannerActivity extends Activity {
 
         if (!isScanning) {
             isScanning = true;
-            tvScanningStatus.setText("סורק רשתות...");
+            tvScanningStatus.setText(getString(R.string.scanning));
             btnRescan.setEnabled(false); // Disable rescan while scanning
             wifiNetworks.clear();
             wifiListAdapter.notifyDataSetChanged();
@@ -161,6 +161,9 @@ public class WifiScannerActivity extends Activity {
                 Log.w(TAG, "WiFi scan timed out.");
                 tvScanningStatus.setText("זמן קצוב לסריקת Wi-Fi.");
                 btnRescan.setEnabled(true);
+                if(wifiNetworks.isEmpty()){
+                    tvScanningStatus.setText(getString(R.string.no_wifi_networks_found));
+                }
             }
         }
     };
@@ -180,10 +183,16 @@ public class WifiScannerActivity extends Activity {
                         wifiNetworks.addAll(results);
                         wifiListAdapter.notifyDataSetChanged();
                         Log.d(TAG, "Found " + wifiNetworks.size() + " WiFi networks.");
-                        tvScanningStatus.setText("נמצאו " + wifiNetworks.size() + " רשתות Wi-Fi.");
+                        tvScanningStatus.setText(String.format(getString(R.string.no_wifi_networks_found) + " (%d)", wifiNetworks.size())); // Update count
+                        if(wifiNetworks.isEmpty()){
+                            tvScanningStatus.setText(getString(R.string.no_wifi_networks_found));
+                        } else {
+                            tvScanningStatus.setText(getString(R.string.tap_to_connect));
+                        }
+
                     } else {
                         Log.w(TAG, "WiFi scan results were null.");
-                        tvScanningStatus.setText("לא נמצאו רשתות Wi-Fi.");
+                        tvScanningStatus.setText(getString(R.string.no_wifi_networks_found));
                     }
                     btnRescan.setEnabled(true); // Re-enable rescan button
                 }
@@ -197,7 +206,7 @@ public class WifiScannerActivity extends Activity {
                     }
                 } else if (state == WifiManager.WIFI_STATE_DISABLED) {
                     Log.d(TAG, "WiFi state changed to DISABLED.");
-                    tvScanningStatus.setText("ה-Wi-Fi כבוי.");
+                    tvScanningStatus.setText(getString(R.string.wifi_disabled_message));
                     btnRescan.setText("הפעל Wi-Fi");
                     btnRescan.setEnabled(true);
                     btnRescan.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS)));
@@ -214,12 +223,12 @@ public class WifiScannerActivity extends Activity {
         // Check if already connected to this network
         WifiInfo currentWifiInfo = wifiManager.getConnectionInfo();
         if (currentWifiInfo != null && network.BSSID.equals(currentWifiInfo.getBSSID())) {
-            Toast.makeText(this, "אתה כבר מחובר לרשת זו.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.connected_to, network.SSID), Toast.LENGTH_SHORT).show();
             return;
         }
 
         // Determine security type
-        boolean isSecured = !network.capabilities.contains("ESS") || network.capabilities.contains("WEP") || network.capabilities.contains("WPA") || network.capabilities.contains("WPA2") || network.capabilities.contains("WPA3");
+        boolean isSecured = network.capabilities.contains("WEP") || network.capabilities.contains("WPA") || network.capabilities.contains("WPA2") || network.capabilities.contains("WPA3");
 
         if (isSecured) {
             // Ask for password
@@ -235,19 +244,19 @@ public class WifiScannerActivity extends Activity {
         builder.setTitle(getString(R.string.enter_password_for, network.SSID));
 
         final EditText passwordEditText = new EditText(this);
-        passwordEditText.setHint(R.string.password);
+        passwordEditText.setHint(getString(R.string.password));
         passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(passwordEditText);
 
-        builder.setPositiveButton(R.string.connect, (dialog, which) -> {
+        builder.setPositiveButton(getString(R.string.connect), (dialog, which) -> {
             String password = passwordEditText.getText().toString();
-            if (password.length() < 8 && network.capabilities.contains("WPA")) { // Basic check for WPA/WPA2 passwords
-                Toast.makeText(this, "הסיסמה קצרה מדי.", Toast.LENGTH_SHORT).show();
-                return;
+            if (password.isEmpty()) {
+                 Toast.makeText(this, "הסיסמה אינה יכולה להיות ריקה.", Toast.LENGTH_SHORT).show();
+                 return;
             }
             connectToSecuredNetwork(network, password);
         });
-        builder.setNegativeButton(R.string.cancel, null);
+        builder.setNegativeButton(getString(R.string.cancel), null);
         builder.show();
     }
 
@@ -255,14 +264,8 @@ public class WifiScannerActivity extends Activity {
         WifiConfiguration conf = new WifiConfiguration();
         conf.SSID = "\"" + network.SSID + "\"";
         conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        conf.allowedProtocols.set(WifiConfiguration.Protocol.RSN); // For WPA/WPA2
-        conf.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-        conf.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-        conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
 
-        // Add or update the network configuration
+        // Try to add/update the network configuration
         int netId = wifiManager.addNetwork(conf);
         if (netId == -1) {
             // Try to update existing network
@@ -279,9 +282,12 @@ public class WifiScannerActivity extends Activity {
 
         if (netId != -1) {
             wifiManager.disconnect();
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.reconnect();
-            Toast.makeText(this, "מתחבר לרשת " + network.SSID + "...", Toast.LENGTH_SHORT).show();
+            if (wifiManager.enableNetwork(netId, true)) {
+                wifiManager.reconnect();
+                Toast.makeText(this, "מתחבר לרשת " + network.SSID + "...", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "שגיאה בהפעלת רשת Wi-Fi.", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "שגיאה בחיבור לרשת.", Toast.LENGTH_SHORT).show();
         }
@@ -329,9 +335,12 @@ public class WifiScannerActivity extends Activity {
 
         if (netId != -1) {
             wifiManager.disconnect();
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.reconnect();
-            Toast.makeText(this, "מתחבר לרשת " + network.SSID + "...", Toast.LENGTH_SHORT).show();
+            if (wifiManager.enableNetwork(netId, true)) {
+                wifiManager.reconnect();
+                Toast.makeText(this, "מתחבר לרשת " + network.SSID + "...", Toast.LENGTH_SHORT).show();
+            } else {
+                 Toast.makeText(this, "שגיאה בהפעלת רשת Wi-Fi.", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "שגיאה בחיבור לרשת.", Toast.LENGTH_SHORT).show();
         }
@@ -349,7 +358,11 @@ public class WifiScannerActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(wifiScanReceiver);
+        try {
+            unregisterReceiver(wifiScanReceiver);
+        } catch (IllegalArgumentException e) {
+            // Receiver not registered, ignore
+        }
         scanHandler.removeCallbacks(scanTimeoutRunnable); // Stop any pending timeouts
         isScanning = false; // Reset scanning state
     }
@@ -361,8 +374,8 @@ public class WifiScannerActivity extends Activity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startWifiScan();
             } else {
-                Toast.makeText(this, "הרשאת מיקום נדחתה. לא ניתן לסרוק רשתות Wi-Fi.", Toast.LENGTH_LONG).show();
-                tvScanningStatus.setText("הרשאת מיקום נדרשת לסריקת Wi-Fi.");
+                Toast.makeText(this, getString(R.string.permission_location_needed_for_wifi), Toast.LENGTH_LONG).show();
+                tvScanningStatus.setText(getString(R.string.permission_location_needed_for_wifi));
             }
         }
     }

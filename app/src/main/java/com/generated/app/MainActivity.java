@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -55,7 +54,7 @@ public class MainActivity extends Activity {
     private static final int REQ_CODE_WIFI_SETTINGS = 1002;
     private static final int REQ_CODE_LOCATION_PERMISSION = 1003;
 
-    private ListView listView; // Changed from ListView to android.widget.ListView
+    private ListView listView;
     private GridView gridView;
     private FileListAdapter adapter;
     private TextView tvCurrentPath, tvStorageInfo, tvEmpty;
@@ -115,7 +114,11 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         // Unregister WiFi scan receiver
-        unregisterReceiver(wifiScanReceiver);
+        try {
+            unregisterReceiver(wifiScanReceiver);
+        } catch (IllegalArgumentException e) {
+            // Receiver not registered, ignore
+        }
         // Stop WiFi scanning if active
         if (isScanningWifi) {
             wifiScanHandler.removeCallbacks(wifiScanRunnable);

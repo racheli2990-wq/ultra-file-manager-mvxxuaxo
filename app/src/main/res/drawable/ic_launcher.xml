@@ -5,7 +5,7 @@
     android:viewportHeight="96">
     <!-- Rounded Background -->
     <path
-        android:fillColor="#FFC107"
+        android:fillColor="#1A73E8"
         android:pathData="M16,0 L80,0 A16,16 0 0,1 96,16 L96,80 A16,16 0 0,1 80,96 L16,96 A16,16 0 0,1 0,80 L0,16 A16,16 0 0,1 16,0 Z" />
     <!-- Stylized Wi-Fi Signal Symbol -->
     <path
